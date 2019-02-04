@@ -2,12 +2,15 @@ import os, glob, cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import scipy.misc as sp
-import progressbar
+from keras.utils import to_categorical
 
-def pack_into_tensor(file_input, h, w, type = 'lanczos'):
-    img_array_tensor = np.array([sp.imresize(sp.imread(i), (h, w), interp=type) for i in file_input])
+
+def pack_into_tensor(file_input, h, w, inerpotype ='bilinear'):
+    img_array_tensor = np.array([sp.imresize(sp.imread(i), (h, w), interp=inerpotype) for i in file_input])
     if img_array_tensor.ndim == 3:
-        img_array_tensor = np.eye(35)[img_array_tensor]
+        print(img_array_tensor.ndim)
+        img_array_tensor = np.expand_dims(img_array_tensor, axis=3)
+    #         img_array_tensor = to_categorical(img_array_tensor, num_classes=35)
     print("Dimension: ", img_array_tensor.shape)
     return img_array_tensor
 
@@ -30,10 +33,8 @@ def read_data(path_raw, path_label, h, w):
     image_input_tensor = pack_into_tensor(data_input, h, w)
     label_input_tensor = pack_into_tensor(label_input, h, w, 'nearest')
 
-    print(image_input_tensor.shape, label_input)
-
-
     return image_input_tensor, label_input_tensor
+
 
 
 # test code
