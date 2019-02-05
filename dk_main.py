@@ -1,6 +1,6 @@
 import sys, os, keras
-sys.path.append('./keras_deeplab_v3_plus')
-sys.path.append('./Keras-segmentation-deeplab-v3.1')
+sys.path.append('../keras_deeplab_v3_plus')
+sys.path.append('../Keras-segmentation-deeplab-v3.1')
 
 import numpy as np
 from keras.models import load_model
