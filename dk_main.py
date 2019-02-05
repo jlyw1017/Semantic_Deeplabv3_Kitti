@@ -24,29 +24,38 @@ path_label_cityscape_fine = os.path.join('/home/jlyw1017/datasets/cityscapes/gtF
 path_test = os.path.join('/home/jlyw1017/datasets/kitti', "testing/image", "*_10.png")
 path_test_label = os.path.join('/home/jlyw1017/datasets/kitti', "testing/label", "*_10.png")
 
-input_tensor, label_tensor = read_data(path_image_cityscape, path_label_cityscape_fine, 300, 600)
-test_tensor, test_tensor_label = read_data(path_test, path_test_label, 300, 600)
+inference_path = os.path.join('/home/jlyw1017/datasets/kitti', "inference/image_2", "*_10.png")
 
-deeplab_model = Deeplabv3(weights=None , input_tensor=None, infer = True, input_shape=(300, 600, 3),
-                          classes=35, backbone='mobilenetv2', OS=16, alpha=1.)
+#input_tensor, label_tensor = read_data(path_image, path_label, 250, 828)
+test_tensor, test_tensor_label = read_data(path_test, path_test_label, 250, 828)
+
+inference_tensor, test_tensor_label = read_data(inference_path, path_test_label, 250, 828)
+
+
+deeplab_model = Deeplabv3(weights=None , input_tensor=None, infer = True, input_shape=(250, 828, 3),
+                          classes=35, backbone='mobilenetv2', OS=8, alpha=1.)
 #deeplab_model = Deeplabv3(input_shape=(375, 1242, 3), classes=35, backbone='mobilenetv2', )
-opter = keras.optimizers.Adagrad(lr=0.001, epsilon=None, decay=0.0)
+opter = keras.optimizers.Adagrad(lr=0.0001, epsilon=None, decay=0.0)
 deeplab_model.compile(optimizer=opter, loss='sparse_categorical_crossentropy')
 #plot_model(deeplab_model, show_shapes=True, to_file='model.png')
-deeplab_model.load_weights('/home/jlyw1017/Semantic_Deeplabv3_Kitti/5_gtCoarse_300x600.h5')
+deeplab_model.load_weights('/home/jlyw1017/Semantic_Deeplabv3_Kitti/8_gtCoarse_300x600_gtFine_300x600_kitti_250x828.h5')
 
-deeplab_model.fit(input_tensor, label_tensor, validation_split=0.05, shuffle=True, nb_epoch=50, batch_size=4,
-                 callbacks=[TensorBoard(log_dir='/home/jlyw1017/Semantic_Deeplabv3_Kitti/mytensorboard', write_images= 1)])
-deeplab_model.save_weights('/home/jlyw1017/Semantic_Deeplabv3_Kitti/6_gtCoarse_300x600_gtFine_300x600.h5')
+#deeplab_model.fit(input_tensor, label_tensor, validation_split=0.05, shuffle=True, nb_epoch=20, batch_size=4,
+#                 callbacks=[TensorBoard(log_dir='/home/jlyw1017/Semantic_Deeplabv3_Kitti/mytensorboard', write_images= 1)])
+#deeplab_model.save_weights('/home/jlyw1017/Semantic_Deeplabv3_Kitti/8_gtCoarse_300x600_gtFine_300x600_kitti_250x828.h5')
 loss_and_metrics = deeplab_model.evaluate(test_tensor, test_tensor_label, batch_size=1)
 print(loss_and_metrics)
 
-test_input = np.array([test_tensor[1]])
-res = deeplab_model.predict(test_input)
-print(res.shape)
-labels = np.argmax(res.squeeze(), -1)
-plt.imshow(labels)
-plt.show()
+count = 0
+for image in test_tensor:
+    count += 1
+    test_input = np.array([image])
+    res = deeplab_model.predict(test_input)
+    labels = np.argmax(res.squeeze(), -1)
+#    plt.figure(res)
+#    plt.savefig(res)
+    plt.imshow(labels)
+    plt.show()
 
 '''
 print('Predict finshed')
